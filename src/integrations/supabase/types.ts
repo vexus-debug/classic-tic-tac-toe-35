@@ -255,6 +255,39 @@ export type Database = {
           },
         ]
       }
+      billing_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          entity: string
+          id: string
+          invoice_id: string | null
+          org_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          entity: string
+          id?: string
+          invoice_id?: string | null
+          org_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          entity?: string
+          id?: string
+          invoice_id?: string | null
+          org_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       blog_articles: {
         Row: {
           auto_generated: boolean
@@ -1019,7 +1052,11 @@ export type Database = {
           description: string | null
           expense_date: string
           id: string
+          invoice_id: string | null
+          is_recurring: boolean
+          next_due_date: string | null
           org_id: string
+          patient_id: string | null
           payment_method: string | null
           receipt_url: string | null
           updated_at: string
@@ -1033,7 +1070,11 @@ export type Database = {
           description?: string | null
           expense_date?: string
           id?: string
+          invoice_id?: string | null
+          is_recurring?: boolean
+          next_due_date?: string | null
           org_id: string
+          patient_id?: string | null
           payment_method?: string | null
           receipt_url?: string | null
           updated_at?: string
@@ -1047,7 +1088,11 @@ export type Database = {
           description?: string | null
           expense_date?: string
           id?: string
+          invoice_id?: string | null
+          is_recurring?: boolean
+          next_due_date?: string | null
           org_id?: string
+          patient_id?: string | null
           payment_method?: string | null
           receipt_url?: string | null
           updated_at?: string
@@ -1055,10 +1100,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "expenses_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "expenses_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -1457,6 +1516,85 @@ export type Database = {
         }
         Relationships: []
       }
+      insurance_claims: {
+        Row: {
+          amount_claimed: number
+          amount_paid: number
+          claim_number: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          insurer_name: string
+          invoice_id: string
+          notes: string | null
+          org_id: string
+          paid_date: string | null
+          patient_id: string | null
+          policy_number: string | null
+          status: string
+          submitted_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_claimed?: number
+          amount_paid?: number
+          claim_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insurer_name: string
+          invoice_id: string
+          notes?: string | null
+          org_id: string
+          paid_date?: string | null
+          patient_id?: string | null
+          policy_number?: string | null
+          status?: string
+          submitted_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_claimed?: number
+          amount_paid?: number
+          claim_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insurer_name?: string
+          invoice_id?: string
+          notes?: string | null
+          org_id?: string
+          paid_date?: string | null
+          patient_id?: string | null
+          policy_number?: string | null
+          status?: string
+          submitted_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_claims_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_claims_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_claims_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory: {
         Row: {
           batch_no: string | null
@@ -1651,34 +1789,94 @@ export type Database = {
           },
         ]
       }
+      invoice_adjustments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_id: string
+          kind: string
+          org_id: string
+          reason: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id: string
+          kind?: string
+          org_id: string
+          reason: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id?: string
+          kind?: string
+          org_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_adjustments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_adjustments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
+          cdt_code: string | null
           created_at: string
           description: string
           id: string
           invoice_id: string
           line_total: number
+          provider_id: string | null
           quantity: number
+          surfaces: string | null
+          tooth_number: string | null
           treatment_id: string | null
           unit_price: number
         }
         Insert: {
+          cdt_code?: string | null
           created_at?: string
           description: string
           id?: string
           invoice_id: string
           line_total?: number
+          provider_id?: string | null
           quantity?: number
+          surfaces?: string | null
+          tooth_number?: string | null
           treatment_id?: string | null
           unit_price?: number
         }
         Update: {
+          cdt_code?: string | null
           created_at?: string
           description?: string
           id?: string
           invoice_id?: string
           line_total?: number
+          provider_id?: string | null
           quantity?: number
+          surfaces?: string | null
+          tooth_number?: string | null
           treatment_id?: string | null
           unit_price?: number
         }
@@ -1688,6 +1886,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
             referencedColumns: ["id"]
           },
           {
@@ -3304,6 +3509,70 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "consent_form_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_credits: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_id: string | null
+          kind: string
+          notes: string | null
+          org_id: string
+          patient_id: string
+          payment_method: string | null
+          reference: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id?: string | null
+          kind?: string
+          notes?: string | null
+          org_id: string
+          patient_id: string
+          payment_method?: string | null
+          reference?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_id?: string | null
+          kind?: string
+          notes?: string | null
+          org_id?: string
+          patient_id?: string
+          payment_method?: string | null
+          reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_credits_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_credits_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_credits_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -5860,9 +6129,14 @@ export type Database = {
           estimate_date: string
           estimate_number: string
           id: string
+          insurance_amount: number
+          insurer_name: string | null
           notes: string | null
           org_id: string
           patient_id: string
+          signature_data: string | null
+          signed_at: string | null
+          signed_name: string | null
           status: string
           subtotal: number
           total: number
@@ -5878,9 +6152,14 @@ export type Database = {
           estimate_date?: string
           estimate_number: string
           id?: string
+          insurance_amount?: number
+          insurer_name?: string | null
           notes?: string | null
           org_id: string
           patient_id: string
+          signature_data?: string | null
+          signed_at?: string | null
+          signed_name?: string | null
           status?: string
           subtotal?: number
           total?: number
@@ -5896,9 +6175,14 @@ export type Database = {
           estimate_date?: string
           estimate_number?: string
           id?: string
+          insurance_amount?: number
+          insurer_name?: string | null
           notes?: string | null
           org_id?: string
           patient_id?: string
+          signature_data?: string | null
+          signed_at?: string | null
+          signed_name?: string | null
           status?: string
           subtotal?: number
           total?: number
