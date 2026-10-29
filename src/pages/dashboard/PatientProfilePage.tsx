@@ -1,6 +1,10 @@
 import { PageSkeleton } from "@/components/dashboard/PageSkeleton";
 import { PatientImageThumb } from "@/components/dashboard/PatientImageThumb";
 import { PatientAlertBanner } from "@/components/dashboard/PatientAlertBanner";
+import { SmartSoapField } from "@/components/dashboard/SmartSoapField";
+import { NoteLockControls } from "@/components/dashboard/NoteLockControls";
+import { ChairsideEducationView } from "@/components/patient/ChairsideEducationView";
+import { Presentation } from "lucide-react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -134,6 +138,7 @@ export default function PatientProfilePage() {
     },
   });
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [chairside, setChairside] = useState(false);
   const [noteForm, setNoteForm] = useState({ subjective: "", objective: "", assessment: "", plan: "" });
   const [imageForm, setImageForm] = useState(() => ({
     imageType: getClinicTerms(currentOrg?.clinic_type).defaultImageType,
@@ -215,6 +220,19 @@ export default function PatientProfilePage() {
   const allergies = patient.allergies ? patient.allergies.split(",").map((a: string) => a.trim()).filter(Boolean) : [];
   const outstandingBalance = invoices.reduce((sum, inv: any) => sum + (Number(inv.total_amount) - Number(inv.amount_paid)), 0);
 
+  if (chairside && patientId) {
+    return (
+      <ChairsideEducationView
+        patientId={patientId}
+        firstName={patient.first_name}
+        showChart={!!terms.showDentalChart}
+        plans={plans as any[]}
+        images={images as any[]}
+        onExit={() => setChairside(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {patientId && activeVisit?.patientId === patientId ? (
@@ -258,6 +276,11 @@ export default function PatientProfilePage() {
             {patient.gender} · Age: {calculateAge(patient.date_of_birth)} · ID: {patient.id?.slice(0, 8)} · Registered: {patient.registered_date}
           </p>
         </div>
+        {canViewClinical && (
+          <Button variant="outline" size="sm" onClick={() => setChairside(true)}>
+            <Presentation className="mr-2 h-4 w-4" /> Chairside mode
+          </Button>
+        )}
         <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} data-tour="patients-detail-edit">
           <Pencil className="mr-2 h-4 w-4" /> Edit
         </Button>
@@ -688,6 +711,7 @@ export default function PatientProfilePage() {
                       <p className="text-sm mt-1">{note.plan}</p>
                     </div>
                   )}
+                  <NoteLockControls note={note} canEdit={canEditClinical} />
                 </CardContent>
               </Card>
             ))}
@@ -858,10 +882,11 @@ export default function PatientProfilePage() {
                 ))}
               </div>
             </div>
-            <div className="space-y-1"><Label className="text-xs font-semibold text-blue-700">S — Patient Complaint</Label><Textarea maxLength={2000} value={noteForm.subjective} onChange={e => setNoteForm(f => ({ ...f, subjective: e.target.value }))} rows={2} placeholder="Patient complaints, symptoms, chief concern..." /></div>
-            <div className="space-y-1"><Label className="text-xs font-semibold text-green-700">O — Clinical Findings</Label><Textarea maxLength={2000} value={noteForm.objective} onChange={e => setNoteForm(f => ({ ...f, objective: e.target.value }))} rows={2} placeholder={terms.showDentalChart ? "Clinical exam, vitals, dental chart findings..." : "Clinical exam, vitals, examination findings..."} /></div>
-            <div className="space-y-1"><Label className="text-xs font-semibold text-amber-700">A — Diagnosis</Label><Textarea maxLength={2000} value={noteForm.assessment} onChange={e => setNoteForm(f => ({ ...f, assessment: e.target.value }))} rows={2} placeholder="Diagnosis, differential diagnosis..." /></div>
-            <div className="space-y-1"><Label className="text-xs font-semibold text-red-700">P — Treatment Plan</Label><Textarea maxLength={2000} value={noteForm.plan} onChange={e => setNoteForm(f => ({ ...f, plan: e.target.value }))} rows={2} placeholder="Treatment plan, prescriptions, follow-up..." /></div>
+            <p className="text-[11px] text-muted-foreground">Tip: type a shortcut like <code>.endo-prep</code>, <code>.post-op</code> or <code>.scale</code> then space to fill it in. Tap the mic to dictate.</p>
+            <div className="space-y-1"><Label className="text-xs font-semibold text-blue-700">S — Patient Complaint</Label><SmartSoapField value={noteForm.subjective} onChange={v => setNoteForm(f => ({ ...f, subjective: v }))} placeholder="Patient complaints, symptoms, chief concern..." /></div>
+            <div className="space-y-1"><Label className="text-xs font-semibold text-green-700">O — Clinical Findings</Label><SmartSoapField value={noteForm.objective} onChange={v => setNoteForm(f => ({ ...f, objective: v }))} placeholder={terms.showDentalChart ? "Clinical exam, vitals, dental chart findings..." : "Clinical exam, vitals, examination findings..."} /></div>
+            <div className="space-y-1"><Label className="text-xs font-semibold text-amber-700">A — Diagnosis</Label><SmartSoapField value={noteForm.assessment} onChange={v => setNoteForm(f => ({ ...f, assessment: v }))} placeholder="Diagnosis, differential diagnosis..." /></div>
+            <div className="space-y-1"><Label className="text-xs font-semibold text-red-700">P — Treatment Plan</Label><SmartSoapField value={noteForm.plan} onChange={v => setNoteForm(f => ({ ...f, plan: v }))} placeholder="Treatment plan, prescriptions, follow-up..." /></div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setNoteDialogOpen(false)}>Cancel</Button>

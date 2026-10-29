@@ -13,6 +13,17 @@ export interface UpdateEntry {
 
 export const updates: UpdateEntry[] = [
   {
+    version: "v2.18.0",
+    date: "October 29, 2026",
+    title: "Signed notes, voice dictation and chairside mode",
+    kind: "feature",
+    items: [
+      { kind: "feature", text: "Clinical notes can be signed and locked; locked notes accept signed addenda with a reason, keeping the original intact." },
+      { kind: "feature", text: "Type shortcuts like .endo-prep or .post-op in SOAP notes to fill in templates, or tap the mic to dictate hands-free." },
+      { kind: "feature", text: "Chairside mode shows patients their tooth chart, X-rays and treatment steps, with all money and internal notes hidden." },
+    ],
+  },
+  {
     version: "v2.17.1",
     date: "October 29, 2026",
     title: "Smoother sign-in",
