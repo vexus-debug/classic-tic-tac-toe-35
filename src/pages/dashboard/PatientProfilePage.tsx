@@ -276,6 +276,11 @@ export default function PatientProfilePage() {
             {patient.gender} · Age: {calculateAge(patient.date_of_birth)} · ID: {patient.id?.slice(0, 8)} · Registered: {patient.registered_date}
           </p>
         </div>
+        {canViewClinical && (
+          <Button variant="outline" size="sm" onClick={() => setChairside(true)}>
+            <Presentation className="mr-2 h-4 w-4" /> Chairside mode
+          </Button>
+        )}
         <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} data-tour="patients-detail-edit">
           <Pencil className="mr-2 h-4 w-4" /> Edit
         </Button>
